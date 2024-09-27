@@ -39,6 +39,14 @@ interface PyodideWrapper {
 
 let _pyodideWrapper: PyodideWrapper | null = null
 
+
+async function loadPythonScript(pyodide: any, url: string) {
+  const response = await fetch(url)
+  const script = await response.text()
+  await pyodide.runPythonAsync(script)
+}
+
+
 async function load(dependencies: string[]) {
   if (_pyodideWrapper === null) {
     console.debug('Downloading pyodide...')
@@ -49,21 +57,7 @@ async function load(dependencies: string[]) {
     console.debug('Loading micropip...')
     await pyodide.loadPackage(['micropip'])
     const micropip = pyodide.pyimport('micropip')
-
-    // pydantic-core requires special handling as it's installed from the file on the github release
-    const pydantic_core_dep = dependencies.find(d => d.startsWith('pydantic-core'))
-    if (pydantic_core_dep) {
-      const pyd_c = pydantic_core_dep.split('==')[1]
-      const {platform} = (pyodide as any)._api.lockfile_info
-      const pydantic_core_wheel = `https://githubproxy.samuelcolvin.workers.dev/pydantic/pydantic-core/releases/download/v${pyd_c}/pydantic_core-${pyd_c}-cp311-cp311-${platform}_wasm32.whl`
-      console.debug(`Installing pydantic-core from "${pydantic_core_wheel}"...`)
-      await micropip.install([pydantic_core_wheel])
-    }
-
-    const other_deps = dependencies.filter(d => !d.startsWith('pydantic-core'))
-
-    console.debug(`Installing ${other_deps}...`)
-    await micropip.install(other_deps)
+    await micropip.install(dependencies)
 
     await pyodide.runPythonAsync(
       // language=python
@@ -92,6 +86,7 @@ export async function runCode(
   code: string,
   onMessage: (data: string[]) => void,
   dependencies: string[],
+  scripts: string[],
 ): Promise<void> {
   updateOut = onMessage
   let py: PyodideWrapper
@@ -103,10 +98,16 @@ export async function runCode(
     updateOut = null
     throw e
   }
-  await py.pyodide.runPythonAsync(`
-import pydantic, pydantic_core
-print(f'pydantic version: v{pydantic.__version__}, pydantic-core version: v{pydantic_core.__version__}')
-`)
+  for (const script of scripts) {
+    try {
+      await loadPythonScript(py.pyodide, script)
+    } catch (e) {
+      update()
+      log(`Error loading script ${script}: ${e}`)
+      updateOut = null
+      throw e
+    }
+  }
   try {
     await py.pyodide.runPythonAsync(code)
     update()

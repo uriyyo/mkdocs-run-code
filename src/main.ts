@@ -107,6 +107,13 @@ class CodeBlock {
     } else {
       this.preEl.classList.add('hide-code')
       python_code = this.codeEl.innerText
+
+      // FIXME: kinda hacky, used to remove extra empty lines
+      python_code = python_code
+        .split('\n')
+        .filter((_, index) => index % 2 !== 1)
+        .join('\n')
+
       this.code_html = this.codeEl.innerHTML
       this.codeEl.classList.add('hide-code')
       this.codeEl.innerText = ''
@@ -163,9 +170,23 @@ class CodeBlock {
     }
 
     // for backwards compatibility
-    const default_deps = ['pydantic_core_version==2.6.3', 'pydantic_version==2.3.0']
+    const default_deps = [
+      'ssl',
+      'sqlite3',
+      'httpx',
+      'sqlalchemy',
+      'fastapi',
+      'pydantic',
+      'pydantic-core',
+      'fastapi-pagination',
+      'asgi-lifespan',
+    ]
+    const scripts = [
+      'https://uriyyo.github.io/fastapi-pagination-docs-run/patch.py',
+    ]
+
     const dependencies = window.mkdocs_run_deps || default_deps
-    runCode(python_code, this.onMessage, dependencies)
+    runCode(python_code, this.onMessage, dependencies, scripts)
   }
 
   reset() {
