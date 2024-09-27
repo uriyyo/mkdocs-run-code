@@ -182,7 +182,7 @@ class CodeBlock {
       'asgi-lifespan',
     ]
     const scripts = [
-      'https://uriyyo.github.io/fastapi-pagination-docs-run/patch.py',
+      'https://uriyyo.github.io/mkdocs-run-code/patch.py',
     ]
 
     const dependencies = window.mkdocs_run_deps || default_deps
