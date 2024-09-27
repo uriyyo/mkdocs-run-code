@@ -76,9 +76,11 @@ async def _pretty_request(
 ) -> None:
     response = await _app_request(app, path=path, method=method, **kwargs)
 
-    print(f"{method} {response.status_code} {path}")
-    print("Body:")
-    print(json.dumps(response.json(), indent=4))
+    print(f"{method} {path}")
+    print(f"status: {response.status_code}")
+    body = json.dumps(response.json(), indent=4)
+    print(f"body: {body}")
+    print()
 
 
 def app_request(
