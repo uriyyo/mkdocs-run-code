@@ -107,13 +107,6 @@ class CodeBlock {
     } else {
       this.preEl.classList.add('hide-code')
       python_code = this.codeEl.innerText
-
-      // FIXME: kinda hacky, used to remove extra empty lines
-      python_code = python_code
-        .split('\n')
-        .filter((_, index) => index % 2 !== 1)
-        .join('\n')
-
       this.code_html = this.codeEl.innerHTML
       this.codeEl.classList.add('hide-code')
       this.codeEl.innerText = ''
