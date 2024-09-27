@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import typing
+import json
 
 import asgi_lifespan
 import httpx
@@ -46,7 +48,7 @@ disable_installed_extensions_check()
 del disable_installed_extensions_check
 
 
-async def app_request(
+async def _app_request(
     app: ASGIApp,
     *,
     path: str = "/",
@@ -60,3 +62,44 @@ async def app_request(
         await stack.enter_async_context(asgi_lifespan.LifespanManager(app))
 
         return await client.request(method, path, **kwargs)
+
+
+_local_tasks = []
+
+
+async def _pretty_request(
+    app: ASGIApp,
+    *,
+    path: str = "/",
+    method: str = "GET",
+    **kwargs: typing.Any,
+) -> None:
+    response = await _app_request(app, path=path, method=method, **kwargs)
+
+    print(f"{method} {response.status_code} {path}")
+    print("Body:")
+    print(json.dumps(response.json(), indent=4))
+
+
+def app_request(
+    app: ASGIApp,
+    *,
+    path: str = "/",
+    method: str = "GET",
+    **kwargs: typing.Any,
+) -> None:
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        asyncio.run(_pretty_request(app, path=path, method=method, **kwargs))
+    else:
+        task = loop.create_task(
+            _pretty_request(app, path=path, method=method, **kwargs),
+        )
+
+        _local_tasks.append(task)
+        task.add_done_callback(lambda _: _local_tasks.remove(task))
+
+
+async def wait_all_tasks() -> None:
+    await asyncio.gather(*_local_tasks)
