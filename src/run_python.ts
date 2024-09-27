@@ -109,11 +109,26 @@ export async function runCode(
     }
   }
   try {
-    await py.pyodide.runPythonAsync(code)
+    const finalCode = prepareCode(code)
+    await py.pyodide.runPythonAsync(finalCode)
     update()
   } catch (e) {
     update()
     log(py.reformatException())
   }
   updateOut = null
+}
+
+function prepareCode(code: string): string {
+  const lines = code.split('\n');
+  const extraLines: string[] = [];
+
+  lines
+    .filter(line => line.startsWith('# req:'))
+    .forEach(line => {
+      const [path, method] = line.trim().split(/\s+/).reverse();
+      extraLines.push(`app_request(app, path='${path}', method='${method}')`)
+    });
+
+  return [...lines, ...extraLines, 'await wait_all_tasks()'].join('\n');
 }
