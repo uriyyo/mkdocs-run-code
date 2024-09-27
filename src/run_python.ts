@@ -57,7 +57,7 @@ async function load(dependencies: string[]) {
     console.debug('Loading micropip...')
     await pyodide.loadPackage(['micropip'])
     const micropip = pyodide.pyimport('micropip')
-    await micropip.install(dependencies)
+    await micropip.install(dependencies, { keepGoing: true })
 
     await pyodide.runPythonAsync(
       // language=python

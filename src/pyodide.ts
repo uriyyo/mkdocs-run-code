@@ -23,7 +23,7 @@ interface PyodideModule {
 }
 
 interface MicroPip {
-  install: (wheels: string[]) => Promise<void>
+  install: (wheels: string[], config: any) => Promise<void>
 }
 
 export interface Pyodide {
