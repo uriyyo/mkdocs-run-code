@@ -11,6 +11,23 @@ import httpx
 if typing.TYPE_CHECKING:
     from starlette.types import ASGIApp
 
+try:
+    from sqlalchemy import Engine, event, SelectBase
+except ImportError:
+    Engine = None
+    event = None
+    SelectBase = None
+else:
+    @event.listens_for(Engine, "before_execute")
+    def receive_before_execute(_, clauseelement, *__):
+        if not isinstance(clauseelement, SelectBase):
+            return
+
+        query_str = str(clauseelement.compile(compile_kwargs={"literal_binds": True})).strip()
+
+        print(f"SQL Query:\n{query_str}")
+        print()
+
 
 def _patch() -> None:
     import typing_extensions
