@@ -1,5 +1,25 @@
 from __future__ import annotations
 
+def _reset_modules() -> None:
+    import sys
+
+    _modules_to_reset = [
+        "fastapi",
+        "fastapi_pagination",
+        "sqlalchemy",
+        "starlette",
+        "httpx",
+        "asgi_lifespan",
+        "pydantic",
+    ]
+
+    for name in list(sys.modules):
+        if any(name.startswith(module) for module in _modules_to_reset):
+            del sys.modules[name]
+
+_reset_modules()
+del _reset_modules
+
 import asyncio
 import contextlib
 import typing
