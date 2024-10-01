@@ -38,15 +38,20 @@ except ImportError:
     event = None
     SelectBase = None
 else:
-    @event.listens_for(Engine, "before_execute")
-    def receive_before_execute(_, clauseelement, *__):
-        if not isinstance(clauseelement, SelectBase):
-            return
+    import sys
 
-        query_str = str(clauseelement.compile(compile_kwargs={"literal_binds": True})).strip()
+    if not getattr(sys, "__listener_added__", False):
+        @event.listens_for(Engine, "before_execute")
+        def receive_before_execute(_, clauseelement, *__):
+            if not isinstance(clauseelement, SelectBase):
+                return
 
-        print(f"SQL Query:\n{query_str}")
-        print()
+            query_str = str(clauseelement.compile(compile_kwargs={"literal_binds": True})).strip()
+
+            print(f"SQL Query:\n{query_str}")
+            print()
+
+        sys.__listener_added__ = True
 
 
 def _patch() -> None:
