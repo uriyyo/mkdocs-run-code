@@ -21,12 +21,15 @@ else:
     import sys
 
     if not getattr(sys, "__listener_added__", False):
+
         @event.listens_for(Engine, "before_execute")
         def receive_before_execute(_, clauseelement, *__):
             if not isinstance(clauseelement, SelectBase):
                 return
 
-            query_str = str(clauseelement.compile(compile_kwargs={"literal_binds": True})).strip()
+            query_str = str(
+                clauseelement.compile(compile_kwargs={"literal_binds": True})
+            ).strip()
 
             print(f"SQL Query:\n{query_str}")
             print()
@@ -49,7 +52,9 @@ def _patch() -> None:
     class _AnyIOToThread:
         @staticmethod
         async def run_sync(
-            func: typing.Any, *args: typing.Any, **_: typing.Any,
+            func: typing.Any,
+            *args: typing.Any,
+            **_: typing.Any,
         ) -> typing.Any:
             return func(*args)
 
@@ -79,7 +84,9 @@ async def _app_request(
 ) -> httpx.Response:
     async with contextlib.AsyncExitStack() as stack:
         client = await stack.enter_async_context(
-            httpx.AsyncClient(app=app, base_url="http://test.com/"),
+            httpx.AsyncClient(
+                transport=httpx.ASGITransport(app), base_url="http://test.com/"
+            ),
         )
         await stack.enter_async_context(asgi_lifespan.LifespanManager(app))
 
