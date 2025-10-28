@@ -171,8 +171,8 @@ class CodeBlock {
       'fastapi',
       'fastapi-pagination',
       'asgi-lifespan',
-      'https://githubproxy.samuelcolvin.workers.dev/pydantic/pydantic-core/releases/download/v2.23.4/pydantic_core-2.23.4-cp311-cp311-emscripten_3_1_46_wasm32.whl',
-      'https://files.pythonhosted.org/packages/df/e4/ba44652d562cbf0bf320e0f3810206149c8a4e99cdbf66da82e97ab53a15/pydantic-2.9.2-py3-none-any.whl',
+      'https://githubproxy.samuelcolvin.workers.dev/pydantic/pydantic-core/releases/download/v2.41.4/pydantic_core-2.41.4-cp312-cp312-emscripten_3_1_58_wasm32.whl',
+      'https://files.pythonhosted.org/packages/a1/6b/83661fa77dcefa195ad5f8cd9af3d1a7450fd57cc883ad04d65446ac2029/pydantic-2.12.3-py3-none-any.whl',
     ]
     const scripts = [
       'https://uriyyo.github.io/mkdocs-run-code/patch.py',

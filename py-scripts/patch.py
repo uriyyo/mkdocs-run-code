@@ -46,6 +46,12 @@ def _patch() -> None:
 
     typing_extensions.Doc = Doc
 
+    class TypeIs:
+        def __class_getitem__(cls, item):
+            return cls
+
+    typing_extensions.TypeIs = TypeIs
+
     from fastapi import concurrency as fastapi_concurrency
     from starlette import concurrency
 
