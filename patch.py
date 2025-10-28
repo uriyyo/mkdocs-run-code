@@ -107,6 +107,7 @@ async def _pretty_request(
     *,
     path: str = "/",
     method: str = "GET",
+    show_headers: bool = False,
     **kwargs: typing.Any,
 ) -> None:
     response = await _app_request(app, path=path, method=method, **kwargs)
@@ -115,6 +116,12 @@ async def _pretty_request(
     print(f"status: {response.status_code}")
     body = json.dumps(response.json(), indent=4)
     print(f"body: {body}")
+
+    if show_headers:
+        print("headers:")
+        for key, value in response.headers.items():
+            print(f"  {key}: {value}")
+
     print()
 
 
@@ -123,15 +130,16 @@ def app_request(
     *,
     path: str = "/",
     method: str = "GET",
+    show_headers: bool = False,
     **kwargs: typing.Any,
 ) -> None:
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
-        asyncio.run(_pretty_request(app, path=path, method=method, **kwargs))
+        asyncio.run(_pretty_request(app, path=path, method=method, show_headers=show_headers, **kwargs))
     else:
         task = loop.create_task(
-            _pretty_request(app, path=path, method=method, **kwargs),
+            _pretty_request(app, path=path, method=method, show_headers=show_headers, **kwargs),
         )
 
         _local_tasks.append(task)
