@@ -124,10 +124,12 @@ function prepareCode(code: string): string {
   const extraLines: string[] = [];
 
   lines
-    .filter(line => line.startsWith('# req:'))
+    .filter(line => line.startsWith('# req:') || line.startsWith('# req(+headers):'))
     .forEach(line => {
       const [path, method] = line.trim().split(/\s+/).reverse();
-      extraLines.push(`app_request(app, path='${path}', method='${method}')`)
+      const showHeaders = line.includes('(+headers)') ? 'True' : 'False';
+
+      extraLines.push(`app_request(app, path='${path}', method='${method}', show_headers=${showHeaders})`);
     });
 
   return [...lines, ...extraLines, 'await wait_all_tasks()'].join('\n');

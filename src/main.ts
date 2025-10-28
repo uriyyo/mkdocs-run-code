@@ -204,6 +204,18 @@ class CodeBlock {
 
   onMessageMethod(data: string[]) {
     this.terminal_output += data.join('')
+
+    if (this.terminal_output.includes('Loaded annotated-types,')) {
+      let lines = this.terminal_output.split('\n');
+
+      const index = lines.findIndex(line => line.includes('Loaded annotated-types,'));
+
+      if (index !== -1) {
+        lines = lines.slice(index + 1);
+        this.terminal_output = lines.join('\n');
+      }
+    }
+
     const output_el = this.output_el
     if (output_el) {
       output_el.innerHTML = ansi_converter.toHtml(this.terminal_output)
